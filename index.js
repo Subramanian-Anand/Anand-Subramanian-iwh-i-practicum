@@ -82,6 +82,46 @@ app.get('/contacts', async (req, res) => {
     }
 });
 
+app.get('/update-cobj', async (req, res) => {
+    res.render('updates', { title: 'Update Custom Object Form | Integrating With HubSpot | Practicum' });
+});
+
+app.post('/update-cobj', async (req, res) => {
+    const { name, age, type } = req.body;
+    const newPet = {
+        properties: {
+            pet_name: name,
+            age: age,
+            type: type
+        }
+    };
+    const url = 'https://api.hubapi.com/crm/v3/objects/2-230020869';
+    const headers = {
+        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+        'Content-Type': 'application/json'
+    };
+    try {
+        await axios.post(url, newPet, { headers });
+        res.redirect('/');
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+app.get('/', async (req, res) => {
+    const url = 'https://api.hubapi.com/crm/v3/objects/2-230020869?properties=pet_name,age,type';
+    const headers = {
+        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+        'Content-Type': 'application/json'
+    };
+    try {
+        const resp = await axios.get(url, { headers });
+        const data = resp.data.results;
+        res.render('homepage', { title: 'Pets | HubSpot Custom Object', data });
+    } catch (error) {
+        console.error(error);
+    }
+});
 
 // * Localhost
 app.listen(3000, () => console.log('Listening on http://localhost:3000'));
